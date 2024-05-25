@@ -1,6 +1,8 @@
 import { writeFile } from "node:fs/promises";
 import { type LibraryOptions, build } from "vite";
+import babel from "vite-plugin-babel";
 import viteConfig from "../vite.config.js";
+import { miniprogramPatch } from "./babel-plugin-miniprogram-patch";
 
 async function buildCjs() {
   await build({
@@ -24,6 +26,16 @@ async function buildCjs() {
         },
       },
     },
+    plugins: [
+      ...viteConfig.plugins!,
+      babel({
+        babelConfig: {
+          plugins: [miniprogramPatch()],
+        },
+        filter: /zxing_(reader|writer|full)\.js$/,
+        include: /zxing_(reader|writer|full)\.js$/,
+      }),
+    ],
     configFile: false,
   });
   await writeFile(
